@@ -4,6 +4,52 @@ const queryUrl = `api.openweathermap.org/data/2.5/weather?q={city name}&appid=${
 const geoCodeUrl = `http://api.openweathermap.org/geo/1.0/direct?q={city name},{state code},{country code}&limit={limit}&appid=${APIKey}`;
 // const oneCallUrl = `https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude={part}&appid=${APIKey}`;
 
+// function getAPI(city) {
+//   const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${APIKey}`;
+//   fetch(currentWeatherUrl)
+//     .then(function (response) {
+//       return response.json();
+//     })
+//     .then(function (data) {
+//       console.log(data);
+//       const oneCallUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${data.coord.lat}&lon=${data.coord.lon}&exclude={part}&units=imperial&appid=${APIKey}`;
+//       fetch(oneCallUrl)
+//         .then(function (response) {
+//           return response.json();
+//         })
+//         .then(function (data) {
+//           console.log(data);
+//           displayToday(data);
+//           displayFiveDay(data);
+//         })
+//     });
+// }
+
+// getAPI("boston");
+
+function getAPI(event) {
+  event.preventDefault();
+  const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${$("#search-input").val()}&appid=${APIKey}`;
+  fetch(currentWeatherUrl)
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      console.log(data);
+      const oneCallUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${data.coord.lat}&lon=${data.coord.lon}&exclude={part}&units=imperial&appid=${APIKey}`;
+      fetch(oneCallUrl)
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (data) {
+          console.log(data);
+          $(".weather-cards").empty();
+          displayToday(data);
+          displayFiveDay(data);
+        })
+    });
+}
+
 function displayToday(data) {
   const card = $("<div>");
   card.addClass("card");
@@ -83,52 +129,6 @@ function displayFiveDay(data) {
     card.append(cardBody, list);
     $(".weather-cards").append(card);
   }
-}
-
-// function getAPI(city) {
-//   const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${APIKey}`;
-//   fetch(currentWeatherUrl)
-//     .then(function (response) {
-//       return response.json();
-//     })
-//     .then(function (data) {
-//       console.log(data);
-//       const oneCallUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${data.coord.lat}&lon=${data.coord.lon}&exclude={part}&units=imperial&appid=${APIKey}`;
-//       fetch(oneCallUrl)
-//         .then(function (response) {
-//           return response.json();
-//         })
-//         .then(function (data) {
-//           console.log(data);
-//           displayToday(data);
-//           displayFiveDay(data);
-//         })
-//     });
-// }
-
-// getAPI("boston");
-
-function getAPI(event) {
-  event.preventDefault();
-  const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${$("#search-input").val()}&appid=${APIKey}`;
-  fetch(currentWeatherUrl)
-    .then(function (response) {
-      return response.json();
-    })
-    .then(function (data) {
-      console.log(data);
-      const oneCallUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${data.coord.lat}&lon=${data.coord.lon}&exclude={part}&units=imperial&appid=${APIKey}`;
-      fetch(oneCallUrl)
-        .then(function (response) {
-          return response.json();
-        })
-        .then(function (data) {
-          console.log(data);
-          $(".weather-cards").empty();
-          displayToday(data);
-          displayFiveDay(data);
-        })
-    });
 }
 
 $(".btn-search").on("click", getAPI);
