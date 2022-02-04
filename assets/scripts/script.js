@@ -4,17 +4,12 @@ let searchHistory = [];
 createButtons();
 
 function getAPI(city) {
-  const history = JSON.parse(localStorage.getItem("Search History"));
-  searchHistory = history || [];
-  if (!searchHistory.includes($("#search-input").val())) {
-    searchHistory.push($("#search-input").val());
-    localStorage.setItem("Search History", JSON.stringify(searchHistory));
-    console.log(history);
-  }
-  createButtons();
   const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${APIKey}`;
   fetch(currentWeatherUrl)
     .then(function (response) {
+      if (!response.ok) {
+        return;
+      }
       return response.json();
     })
     .then(function (data) {
@@ -26,22 +21,32 @@ function getAPI(city) {
         })
         .then(function (data) {
           console.log(data);
-          $(".weather-cards").empty();
+          $(".today-card").empty();
+          $(".five-day-cards").empty();
           displayToday(data);
           displayFiveDay(data);
+          const history = JSON.parse(localStorage.getItem("Searched Cities"));
+          searchHistory = history || [];
+          if (!searchHistory.includes($("#search-input").val())) {
+            searchHistory.push($("#search-input").val());
+            localStorage.setItem("Searched Cities", JSON.stringify(searchHistory));
+          }
+          createButtons();
         })
     });
 }
 
 function createButtons() {
   $(".history-buttons").empty();
-  const history = JSON.parse(localStorage.getItem("Search History"));
-  history.forEach(element => {
-    const button = $(`<button>${element}</button>`);
-    button.addClass("btn btn-primary history-btn");
-    button.attr("type", "button");
-    $(".history-buttons").append(button);
-  });
+  const history = JSON.parse(localStorage.getItem("Searched Cities"));
+  if (history) {
+    history.forEach(element => {
+      const button = $(`<button>${element}</button>`);
+      button.addClass("btn btn-primary history-btn");
+      button.attr("type", "button");
+      $(".history-buttons").append(button);
+    });
+  }
 }
 
 function displayToday(data) {
@@ -85,14 +90,14 @@ function displayToday(data) {
   list.append(temp, wind, humidity, UV);
 
   card.append(cardBody, list);
-  $(".weather-cards").append(card);
+  $(".today-card").append(card);
 }
 
 function displayFiveDay(data) {
   for (let i = 1; i < 6; i++) {
     const card = $("<div>");
     card.addClass("card");
-    card.attr("style", "width: 18rem");
+    card.attr("style", "width: 15rem");
 
     const cardBody = $("<div>");
     cardBody.addClass("card-body");
@@ -121,13 +126,13 @@ function displayFiveDay(data) {
     list.append(temp, wind, humidity);
 
     card.append(cardBody, list);
-    $(".weather-cards").append(card);
+    $(".five-day-cards").append(card);
   }
 }
 
 $(".search-btn").on("click", submitInputBox);
 
-$(".history-btn").on("click", submitHistoryButton);
+$(".history-buttons").on("click", ".history-btn", submitHistoryButton);
 
 function submitInputBox(event) {
   event.preventDefault();
@@ -137,6 +142,5 @@ function submitInputBox(event) {
 
 function submitHistoryButton() {
   let city = $(this).text();
-  console.log(city);
   getAPI(city);
 }

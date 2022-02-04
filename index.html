@@ -12,26 +12,19 @@
 </head>
 
 <body>
-  <header>Weather Forecast</header>
-  <main>
+  <header>
+    <h1>Weather Forecast</h1>
+  </header>
+  <main class="container">
     <form>
       <input type="text" id="search-input" placeholder="Search a city...">
       <button class="btn btn-primary search-btn">Search</button>
     </form>
-    <div class="btn-group-vertical history-buttons"></div>
-    <div class="today-card"></div>
-    <div class="weather-cards">
-      <!-- <div class="card" style="width: 18rem;">
-        <div class="card-body">
-          <h5 class="card-title">City (date)</h5>
-          <img src="http://openweathermap.org/img/wn/10d@2x.png" class="card-img-top" alt="...">
-        </div>
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item">Temp:</li>
-          <li class="list-group-item">Wind:</li>
-          <li class="list-group-item">Humidity:</li>
-        </ul>
-      </div> -->
+    <div class="row">
+      <div class="col-2 btn-group-vertical history-buttons"></div>
+      <div class="col-10 today-card"></div>
+    </div>
+    <div class="row five-day-cards">
     </div>
   </main>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
