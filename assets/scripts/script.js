@@ -1,35 +1,18 @@
 const APIKey = "cc0e1f5052229d5c8c336b1380ead2a3";
-const queryUrl = `api.openweathermap.org/data/2.5/weather?q={city name}&appid=${APIKey}`;
-// const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=boston&appid=${APIKey}`;
-const geoCodeUrl = `http://api.openweathermap.org/geo/1.0/direct?q={city name},{state code},{country code}&limit={limit}&appid=${APIKey}`;
-// const oneCallUrl = `https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude={part}&appid=${APIKey}`;
+let searchHistory = [];
 
-// function getAPI(city) {
-//   const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${APIKey}`;
-//   fetch(currentWeatherUrl)
-//     .then(function (response) {
-//       return response.json();
-//     })
-//     .then(function (data) {
-//       console.log(data);
-//       const oneCallUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${data.coord.lat}&lon=${data.coord.lon}&exclude={part}&units=imperial&appid=${APIKey}`;
-//       fetch(oneCallUrl)
-//         .then(function (response) {
-//           return response.json();
-//         })
-//         .then(function (data) {
-//           console.log(data);
-//           displayToday(data);
-//           displayFiveDay(data);
-//         })
-//     });
-// }
+createButtons();
 
-// getAPI("boston");
-
-function getAPI(event) {
-  event.preventDefault();
-  const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${$("#search-input").val()}&appid=${APIKey}`;
+function getAPI(city) {
+  const history = JSON.parse(localStorage.getItem("Search History"));
+  searchHistory = history || [];
+  if (!searchHistory.includes($("#search-input").val())) {
+    searchHistory.push($("#search-input").val());
+    localStorage.setItem("Search History", JSON.stringify(searchHistory));
+    console.log(history);
+  }
+  createButtons();
+  const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${APIKey}`;
   fetch(currentWeatherUrl)
     .then(function (response) {
       return response.json();
@@ -50,6 +33,17 @@ function getAPI(event) {
     });
 }
 
+function createButtons() {
+  $(".history-buttons").empty();
+  const history = JSON.parse(localStorage.getItem("Search History"));
+  history.forEach(element => {
+    const button = $(`<button>${element}</button>`);
+    button.addClass("btn btn-primary history-btn");
+    button.attr("type", "button");
+    $(".history-buttons").append(button);
+  });
+}
+
 function displayToday(data) {
   const card = $("<div>");
   card.addClass("card");
@@ -60,13 +54,13 @@ function displayToday(data) {
 
   const date = $("<h5>");
   date.addClass("card-title");
-  date.text(`Current, ${moment(data.current.dt, "X").format("ddd, MMM Do")}`);
+  date.text(moment(data.current.dt, "X").format("ddd, MMM Do"));
 
   const icon = $("<img>");
   icon.addClass("card-img-top");
   icon.attr("src", `http://openweathermap.org/img/wn/${data.daily[0].weather[0].icon}@2x.png`);
   icon.attr("alt", data.current.weather[0].description);
-  
+
   cardBody.append(date, icon);
 
   const list = $("<ul>");
@@ -87,7 +81,7 @@ function displayToday(data) {
   } else {
     UV.addClass("severe");
   }
-  
+
   list.append(temp, wind, humidity, UV);
 
   card.append(cardBody, list);
@@ -111,7 +105,7 @@ function displayFiveDay(data) {
     icon.addClass("card-img-top");
     icon.attr("src", `http://openweathermap.org/img/wn/${data.daily[i].weather[0].icon}@2x.png`);
     icon.attr("alt", data.daily[i].weather[0].description);
-    
+
     cardBody.append(date, icon);
 
     const list = $("<ul>");
@@ -123,7 +117,7 @@ function displayFiveDay(data) {
     temp.addClass("list-group-item");
     wind.addClass("list-group-item");
     humidity.addClass("list-group-item");
-    
+
     list.append(temp, wind, humidity);
 
     card.append(cardBody, list);
@@ -131,4 +125,18 @@ function displayFiveDay(data) {
   }
 }
 
-$(".btn-search").on("click", getAPI);
+$(".search-btn").on("click", submitInputBox);
+
+$(".history-btn").on("click", submitHistoryButton);
+
+function submitInputBox(event) {
+  event.preventDefault();
+  let city = $("#search-input").val().trim();
+  getAPI(city);
+}
+
+function submitHistoryButton() {
+  let city = $(this).text();
+  console.log(city);
+  getAPI(city);
+}
