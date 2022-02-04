@@ -1,12 +1,16 @@
 const APIKey = "cc0e1f5052229d5c8c336b1380ead2a3";
 let searchHistory = [];
 
+// Creates search history buttons when page is loaded
 createButtons();
 
-function getAPI(city) {
+
+function getWeather(city) {
+  // Calls Current Weather API with city name
   const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${APIKey}`;
   fetch(currentWeatherUrl)
     .then(function (response) {
+      // Stops function if invalid city
       if (!response.ok) {
         return;
       }
@@ -14,6 +18,7 @@ function getAPI(city) {
     })
     .then(function (data) {
       console.log(data);
+      // Uses coordinates from Current Weather API to call One Call API
       const oneCallUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${data.coord.lat}&lon=${data.coord.lon}&exclude={part}&units=imperial&appid=${APIKey}`;
       fetch(oneCallUrl)
         .then(function (response) {
@@ -21,16 +26,20 @@ function getAPI(city) {
         })
         .then(function (data) {
           console.log(data);
+          // Deletes weather cards before adding new cards
           $(".today-card").empty();
           $(".five-day-cards").empty();
+          // Displays weather cards
           displayToday(data);
           displayFiveDay(data);
           const history = JSON.parse(localStorage.getItem("Searched Cities"));
           searchHistory = history || [];
+          // If city not already in local storage, saves city to local storage
           if (!searchHistory.includes($("#search-input").val())) {
             searchHistory.push($("#search-input").val());
             localStorage.setItem("Searched Cities", JSON.stringify(searchHistory));
           }
+          // Updates history buttons
           createButtons();
         })
     });
@@ -38,6 +47,7 @@ function getAPI(city) {
 
 function createButtons() {
   $(".history-buttons").empty();
+  // Creates button for each city saved in local storage
   const history = JSON.parse(localStorage.getItem("Searched Cities"));
   if (history) {
     history.forEach(element => {
@@ -49,6 +59,7 @@ function createButtons() {
   }
 }
 
+// Creates today's weather card
 function displayToday(data) {
   const card = $("<div>");
   card.addClass("card");
@@ -79,6 +90,7 @@ function displayToday(data) {
   wind.addClass("list-group-item");
   humidity.addClass("list-group-item");
   UV.addClass("list-group-item");
+  // Colors UV index according to value
   if (data.current.uvi < 3) {
     UV.addClass("favorable");
   } else if (data.current.uvi < 8) {
@@ -93,6 +105,7 @@ function displayToday(data) {
   $(".today-card").append(card);
 }
 
+// Creates five-day weather cards
 function displayFiveDay(data) {
   for (let i = 1; i < 6; i++) {
     const card = $("<div>");
@@ -130,17 +143,21 @@ function displayFiveDay(data) {
   }
 }
 
+// Adds event listener for search input
 $(".search-btn").on("click", submitInputBox);
 
+// Adds event listener for each history button
 $(".history-buttons").on("click", ".history-btn", submitHistoryButton);
 
+// Defines city and calls getWeather(city)
 function submitInputBox(event) {
   event.preventDefault();
   let city = $("#search-input").val().trim();
-  getAPI(city);
+  getWeather(city);
 }
 
+// Defines city and calls getWeather(city)
 function submitHistoryButton() {
   let city = $(this).text();
-  getAPI(city);
+  getWeather(city);
 }
